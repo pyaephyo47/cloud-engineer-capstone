@@ -70,8 +70,18 @@ resource "aws_instance" "my_first_server" {
   }
 }
 
-# 5. Automatically print the EC2 Public IP address
+# 6. Allocate a permanent Static Elastic IP address
+resource "aws_eip" "my_static_ip" {
+  instance = aws_instance.my_first_server.id
+  domain   = "vpc" # Tells AWS to allocate it inside your default network stack
+
+  tags = {
+    Name = "Capstone-Static-IP"
+  }
+}
+
+# 7. Update your output block to print your permanent IP instead
 output "server_public_ip" {
-  description = "The public IP address of the EC2 instance"
-  value       = aws_instance.my_first_server.public_ip
+  description = "The permanent static IP address of the EC2 instance"
+  value       = aws_eip.my_static_ip.public_ip
 }
