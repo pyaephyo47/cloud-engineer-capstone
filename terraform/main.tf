@@ -7,10 +7,10 @@ terraform {
     }
   }
   backend "s3" {
-    bucket         = "pyaephyo-terraform-state-bucket"
-    key            = "dev/terraform.tfstate"           # The folder path inside the bucket
-    region         = "us-east-1"
-    encrypt        = true                              # Encrypts the state file for security
+    bucket  = "pyaephyo-terraform-state-bucket"
+    key     = "dev/terraform.tfstate" # The folder path inside the bucket
+    region  = "us-east-1"
+    encrypt = true # Encrypts the state file for security
   }
 }
 
@@ -28,7 +28,7 @@ resource "aws_security_group" "web_ssh_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] 
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -41,7 +41,7 @@ resource "aws_security_group" "web_ssh_sg" {
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" 
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -56,7 +56,7 @@ resource "aws_instance" "my_first_server" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web_ssh_sg.id]
   key_name               = var.key_name
-  
+
   user_data = <<-EOF
               #!/bin/bash
               sudo apt-get update -y
