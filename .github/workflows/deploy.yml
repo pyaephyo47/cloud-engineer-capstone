@@ -1,29 +1,39 @@
-name: Deploy Web App to EC2
+name: "Deploy Web App with Docker Compose"
 
 on:
   push:
     branches:
       - main
     paths-ignore:
-      - 'terraform/**'
+      - 'terraform/**' # 🎯 Skips this pipeline if you only edit cloud infrastructure files
 
 jobs:
   deploy:
+    name: "Deploy Multi-Container App via SSH"
     runs-on: ubuntu-latest
+
     steps:
-      - name: Execute remote SSH commands to deploy
+      - name: Execute Remote Docker Compose Commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.CAPSTONE_SSH }}
+          host: ${{ secrets.EC2_HOST }}             # Your permanent static Elastic IP
+          username: ${{ secrets.EC2_USERNAME }}     # ubuntu
+          key: ${{ secrets.CAPSTONE_SSH }}         # Your secure custom private key
           script: |
+            # 1. Clone the project repository if it is the first run, otherwise pull latest changes
             if [ ! -d "~/cloud-engineer-capstone" ]; then
-              git clone https://github.com/pyaephyo47/cloud-engineer-capstone.git
+              git clone https://github.com/pyaephyo47/cloud-engineer-capstone.git ~/cloud-engineer-capstone 
             fi
+            
             cd ~/cloud-engineer-capstone 
             git pull origin main
-            docker stop capstone-site || true
-            docker rm capstone-site || true
-            docker build -t capstone-app .
-            docker run -d -p 80:80 --name capstone-site capstone-app
+
+            # 2. Stop and clear out any old legacy single containers running on port 80
+            docker stop web-app || true
+            docker rm web-app || true
+
+            # 3. Bring down any old compose stack deployments cleanly
+            docker compose down || true
+
+            # 4. Build and boot your fresh multi-container app stack in the background
+            docker compose up -d --build

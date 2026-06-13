@@ -56,14 +56,22 @@ resource "aws_instance" "my_first_server" {
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.web_ssh_sg.id]
   key_name               = var.key_name
-
-  user_data = <<-EOF
+  user_data              = <<-EOF
               #!/bin/bash
+              # Update packages
               sudo apt-get update -y
-              sudo apt-get install nginx -y
-              sudo systemctl start nginx
-              sudo systemctl enable nginx
+              
+              # Install Git and Docker cleanly (No native Nginx)
+              sudo apt-get install -y git docker.io
+              
+              # Start and enable the Docker daemon engine
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              
+              # Add default system user to docker group permissions
+              sudo usermod -aG docker ubuntu
               EOF
+
 
   tags = {
     Name = "Terraform-Nginx-Server"
