@@ -33,7 +33,7 @@ jobs:
             docker rm web-app || true
 
             # 3. Bring down any old compose stack deployments cleanly
-            docker compose down || true
+            docker-compose down || true
 
             # 4. Build and boot your fresh multi-container app stack in the background
-            docker compose up -d --build
+            docker-compose up -d --build
